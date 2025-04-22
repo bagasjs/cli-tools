@@ -62,7 +62,7 @@ class TopEntries:
             else:
                 print(f"#{i+1} [FOLDER] {entry.path} -> {to_pretty_size(entry.size)}")
 
-def show_directory_biggest_files(root: str, excluded: list[str], top_n: int = 10):
+def show_directory_biggest_files(root: str, excluded: list[str], top_n: int = 10, no_warning = False):
     if not path.isdir(root):
         print(f"ERROR: {root} is not a directory")
 
@@ -77,6 +77,7 @@ def show_directory_biggest_files(root: str, excluded: list[str], top_n: int = 10
             continue
         try: 
             entries = os.listdir(dir.path)
+
             new_dirs = []
             for entry in entries:
                 if entry in excluded:
@@ -93,11 +94,16 @@ def show_directory_biggest_files(root: str, excluded: list[str], top_n: int = 10
                         usage += entry.size
                         total_entries += 1
                     except FileNotFoundError:
-                        print(f"[WARNING] What the hell is {entry}? This will be skipped thus the ranking would be inaccurate")
+                        if not no_warning:
+                            print(f"[WARNING] What the hell is {entry}? This will be skipped thus the ranking would be inaccurate")
             new_dirs.reverse()
             dirs.extend(new_dirs)
         except PermissionError:
-            print(f"[WARNING] Skipping {dir.path} the results would be inaccurate")
+            if not no_warning:
+                print(f"[WARNING] Skipping {dir.path} the results would be inaccurate")
+        except FileNotFoundError:
+            if not no_warning:
+                print(f"[WARNING] What the hell is {dir.path}? This will be skipped thus the ranking would be inaccurate")
 
 
     top.display()
@@ -110,7 +116,8 @@ if __name__ == "__main__":
     import optparse
     parser = optparse.OptionParser()
     parser.add_option("-n", default=100, help="the amount of rank available")
+    parser.add_option("--no-warning", dest="no_warning", default=False, help="Don't display warning messages", action="store_true")
     parser.add_option("--exclude", action="append", help="List of excluded entry", default=[])
     options, args = parser.parse_args()
 
-    show_directory_biggest_files(os.getcwd(), options.exclude, top_n=int(options.n))
+    show_directory_biggest_files(os.getcwd(), options.exclude, top_n=int(options.n), no_warning=options.no_warning)
