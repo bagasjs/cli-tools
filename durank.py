@@ -67,6 +67,7 @@ def show_directory_biggest_files(root: str, excluded: list[str], top_n: int = 10
         print(f"ERROR: {root} is not a directory")
 
     usage = 0
+    total_entries = 0
     dirs = [ Entry(root, 0) ]
     top =  TopEntries(top_n)
 
@@ -90,6 +91,7 @@ def show_directory_biggest_files(root: str, excluded: list[str], top_n: int = 10
                         entry = Entry(entry, dir.depth + 1, path.getsize(entry), True)
                         top.update(entry)
                         usage += entry.size
+                        total_entries += 1
                     except FileNotFoundError:
                         print(f"[WARNING] What the hell is {entry}? This will be skipped thus the ranking would be inaccurate")
             new_dirs.reverse()
@@ -99,7 +101,9 @@ def show_directory_biggest_files(root: str, excluded: list[str], top_n: int = 10
 
 
     top.display()
-    print(f"Total size of scanned from `{root}` is {to_pretty_size(usage)}")
+    print(f"Scanned `{root}` with the following results:")
+    print(f"Total files: {total_entries}")
+    print(f"Total scanned size: {to_pretty_size(usage)}")
 
 
 if __name__ == "__main__":
